@@ -51,6 +51,19 @@ def call_groq(prompt):
         st.error(f"Error parsing Groq response: {e}")
         return "❌ Failed to parse Groq response."
 
+# add code to get human feedback
+def update_feedback(orig_prompt, feedback_label):
+    txt = st.text_input(
+        label = feedback_label,
+        max_chars = 200)
+    if st.button ("Submit") and txt:
+       # st.write ("Updating your plan...")        
+        prompt = orig_prompt + txt
+        print (prompt)
+        newplan = call_groq(prompt)
+        print (newplan)
+        st.rerun()
+    return
 def export_pdf_from_text(title, text_dict):
     pdf = FPDF()
     pdf.add_page()
@@ -166,8 +179,11 @@ with col1:
         save_data(data); st.success("Nutrition saved!")
 with col2:
     if st.button("AI Nutrition Plan"):
-        plan = call_groq(f"Generate meal plan for a {age}-year-old {gender} {weight}kg aiming {', '.join(goals)}.")
+        prompt = f"Generate meal plan for a {age}-year-old {gender} {weight}kg aiming {', '.join(goals)}."
+        plan = call_groq(prompt)
         st.info(plan)
+        feedback_label = "If you would like to make any changes to your nutritional plan, please enter below"
+        update_feedback(prompt, feedback_label)
 
 # -------- MACRO CHART --------
 if data.get("nutrition"):
